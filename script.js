@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* Menu Filters */
   const filterButtons = document.querySelectorAll('.filter-btn');
-const menuItems = document.querySelectorAll('.menu-item');
+const menuItems = document.querySelectorAll('#menu .menu-item');
  
   filterButtons.forEach(btn => {
     btn.addEventListener('click', () => {

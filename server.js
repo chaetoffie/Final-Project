@@ -30,7 +30,7 @@ app.post('/submit-contact', async (req, res) => {
     await db.query(queryText, values); 
 
     // Redirect the user back to the home page with a success message
-    res.redirect('/?status=success#contact'); 
+    res.redirect('/thankyou.html'); 
   } catch (err) {
     console.error('Database Insertion Error:', err.stack);
     // Send a plain status response for a deployment environment

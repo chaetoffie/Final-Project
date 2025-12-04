@@ -592,19 +592,26 @@ form button[type="submit"]:hover {
   pointer-events: none;
 }
 .contact-form {
-    /* REQUIRED: Set a maximum width so it doesn't span 100% */
-    max-width: 500px;
-    
-    /* REQUIRED: Sets top/bottom margin to 0, and left/right margin to auto (centers it) */
+    max-width: 700px;
     margin: 0 auto; 
-    
-    /* (The rest of your existing styling below) */
     padding: 30px;
-    background: #fff;
+    background: black;
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     display: flex;
     flex-direction: column;
     gap: 10px;
     text-align: left;
+}
+.footer-content {
+    /* REQUIRED LINES FOR CENTERING THE BLOCK: */
+    max-width: 500px; /* 1. Define a maximum width for the whole content area */
+    margin: 0 auto;  /* 2. Center the block itself on the screen */
+    
+    /* Existing layout styles (kept for context): */
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    text-align: center;
+    padding: 40px 20px;
 }

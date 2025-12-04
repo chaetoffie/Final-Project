@@ -143,10 +143,16 @@ const menuItems = document.querySelectorAll('#menu .menu-item');
     updateCart();
   });
   cartDropdown.querySelector('.cart-checkout').addEventListener('click', e => {
-    e.stopPropagation();
-    if (!cart.length) return showToast('Your cart is empty.');
-    showToast('Proceeding to checkout... (demo)');
-  });
+  e.stopPropagation();
+  if (!cart.length) return showToast('Your cart is empty.');
+
+  // Save current cart to localStorage for demo checkout page
+  localStorage.setItem('demoCart', JSON.stringify(cart));
+
+  // Redirect to demo checkout page
+  window.location.href = 'checkout.html';
+});
+
 
   /* Toast Notifications */
   const showToast = msg => {

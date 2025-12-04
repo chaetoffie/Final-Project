@@ -1,18 +1,182 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Accept a payment</title>
-    <meta name="description" content="A demo of a payment on Stripe" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="style.css" />
-    <script src="https://js.stripe.com/clover/stripe.js"></script>
-    <script src="checkout.js" defer></script>
-  </head>
-  <body>
-    <!-- Display a payment form -->
-      <div id="checkout">
-        <!-- Checkout will insert the payment form here -->
-      </div>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <title>GCash Payment Demo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display&family=Viaoda+Libre&display=swap" rel="stylesheet">
+  <style>
+    /* Base & Colors from your theme */
+    :root {
+      --primary-color: #f5f5dc;
+      --secondary-color: #6f4e37;
+      --accent-color: #c8a064;
+      --text-color: #e8e6e3;
+      --bg-color: #121212;
+      --header-font: 'Playfair Display', serif;
+      --body-font: 'Viaoda Libre', serif;
+    }
+
+    body {
+      font-family: var(--body-font);
+      background: linear-gradient(135deg, #1a1a1a, #2b1b0e);
+      display: flex;
+      justify-content: center;
+      padding-top: 60px;
+      color: var(--text-color);
+      line-height: 1.5;
+    }
+
+    .checkout-box {
+      width: 800px;
+      background: #1f1f1f;
+      border: 2px solid var(--secondary-color);
+      border-radius: 14px;
+      padding: 2rem;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+
+    h2 {
+      font-family: var(--header-font);
+      font-size: 2.6rem;
+      color: var(--accent-color);
+      margin-bottom: 0.3rem;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: var(--text-color);
+      margin-bottom: 20px;
+      font-style: italic;
+    }
+
+    #cart-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-bottom: 1rem;
+    }
+
+    .item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-color);
+    }
+
+    .total {
+      font-family: var(--header-font);
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin: 20px 0;
+      text-align: right;
+      color: var(--accent-color);
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background: var(--secondary-color);
+      border: none;
+      margin-top: 15px;
+      border-radius: 12px;
+      color: var(--primary-color);
+      font-size: 16px;
+      font-family: var(--body-font);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background: var(--accent-color);
+      color: var(--bg-color);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .note {
+      font-size: 0.85rem;
+      color: var(--text-color);
+      margin-top: 10px;
+    }
+
+    img.qr {
+      width: 220px;
+      margin: 15px 0;
+      border-radius: 12px;
+      border: 2px solid var(--accent-color);
+    }
+
+    /* Inputs for Name, Phone, Address */
+    input {
+      width: 100%;
+      padding: 0.55rem 0.8rem;
+      margin: 8px 0;
+      border-radius: 10px;
+      border: 1px solid var(--accent-color);
+      background: #121212;
+      color: var(--primary-color);
+      font-family: var(--body-font);
+      font-size: 1rem;
+    }
+
+    input::placeholder {
+      color: rgba(255,255,255,0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="checkout-box">
+    <h2>GCash Payment Demo</h2>
+    <p class="subtitle">(School Project Only)</p>
+
+    <div id="cart-list"></div>
+    <p class="total" id="checkout-total">Total: ₱0</p>
+
+    <p>Scan this QR code using your GCash app:</p>
+    <img src="assets/gcash-qr.png" alt="GCash QR" class="qr">
+
+    <!-- Customer Details -->
+    <input type="text" id="customer-name" placeholder="Full Name" required>
+    <input type="tel" id="customer-phone" placeholder="Phone Number" required>
+    <input type="text" id="customer-address" placeholder="Delivery Address" required>
+
+    <button onclick="confirmPayment()">I Paid</button>
+    <p class="note">This is a demo. No real payment is processed.</p>
+  </div>
+
+  <script>
+    const cart = JSON.parse(localStorage.getItem('demoCart') || '[]');
+    const cartList = document.getElementById('cart-list');
+    let total = 0;
+
+    cart.forEach(item => {
+      total += item.price * item.qty;
+      const div = document.createElement('div');
+      div.className = 'item';
+      div.innerHTML = `<span>${item.name} x${item.qty}</span><span>₱${(item.price * item.qty).toFixed(2)}</span>`;
+      cartList.appendChild(div);
+    });
+
+    document.getElementById('checkout-total').textContent = 'Total: ₱' + total.toFixed(2);
+
+    function confirmPayment() {
+      const name = document.getElementById('customer-name').value.trim();
+      const phone = document.getElementById('customer-phone').value.trim();
+      const address = document.getElementById('customer-address').value.trim();
+
+      if(!name || !phone || !address){
+        alert('Please fill all details before confirming payment.');
+        return;
+      }
+
+      alert(`Payment confirmed!\n\nName: ${name}\nPhone: ${phone}\nAddress: ${address}\nTotal: ₱${total.toFixed(2)}`);
+      localStorage.removeItem('demoCart');
+      window.location.href = 'thankyou.html';
+    }
+  </script>
+</body>
 </html>

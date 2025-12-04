@@ -19,10 +19,58 @@ app.use(bodyParser.json());
 // Serve all static files from the root directory
 app.use(express.static(path.join(__dirname, '/')));
 
+
+/**
+ * 🛠️ Database Migration Function
+ * This function checks for and adds the 'created_at' column if it's missing,
+ * allowing the /messages route to work correctly and display timestamps.
+ */
+async function runMigrations() {
+  try {
+    // 1. Check if the 'created_at' column exists in the contact_messages table
+    const checkQuery = `
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'contact_messages' 
+      AND column_name = 'created_at';
+    `;
+    const checkResult = await db.query(checkQuery);
+
+    if (checkResult.rows.length === 0) {
+      // 2. If the column is missing, run the ALTER TABLE command to add it
+      console.log('⚠️ Running migration: Adding missing "created_at" column...');
+      const alterQuery = `
+        ALTER TABLE contact_messages
+        ADD COLUMN created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+      `;
+      await db.query(alterQuery);
+      console.log('✅ Migration successful: "created_at" column added.');
+    } else {
+      console.log('✅ Migration check: "created_at" column already exists. Skipping.');
+    }
+  } catch (err) {
+    console.error('❌ Migration Error: Could not run schema updates:', err.message);
+  }
+}
+
+/**
+ * Diagnostic function to test the database connection on startup.
+ */
+async function initDatabase() {
+  try {
+    const result = await db.query('SELECT 1 + 1 AS solution');
+    console.log('✅ Database Connection Test Successful:', result.rows[0].solution);
+    return true;
+  } catch (err) {
+    console.error('❌ FATAL: Database Connection Failed on Startup. ECONNREFUSED likely caused by firewall.');
+    console.error('>>> Ensure you are using the INTERNAL DATABASE URL for your Render environment variable (e.g., DATABASE_URL).');
+    console.error('Error Details:', err.message);
+    return false;
+  }
+}
+
 /**
  * Helper function to generate a simple HTML page with the messages table.
- * @param {Array<Object>} messages - The array of contact messages from the database.
- * @returns {string} The full HTML content.
  */
 function generateMessagesTable(messages) {
   let tableRows = '';
@@ -34,7 +82,7 @@ function generateMessagesTable(messages) {
         <td style="padding: 12px 15px; text-align: left;">${msg.name}</td>
         <td style="padding: 12px 15px; text-align: left;"><a href="mailto:${msg.email}" style="color: #007bff; text-decoration: none;">${msg.email}</a></td>
         <td style="padding: 12px 15px; text-align: left;">${msg.message}</td>
-        <td style="padding: 12px 15px; text-align: left; font-size: 0.9em;">${new Date(msg.created_at).toLocaleString()}</td>
+        <td style="padding: 12px 15px; text-align: left; font-size: 0.9em;">${msg.created_at ? new Date(msg.created_at).toLocaleString() : 'N/A'}</td>
       </tr>
     `).join('');
   }
@@ -80,22 +128,6 @@ function generateMessagesTable(messages) {
   `;
 }
 
-/**
- * Diagnostic function to test the database connection on startup.
- */
-async function initDatabase() {
-  try {
-    const result = await db.query('SELECT 1 + 1 AS solution');
-    console.log('✅ Database Connection Test Successful:', result.rows[0].solution);
-    return true;
-  } catch (err) {
-    console.error('❌ FATAL: Database Connection Failed on Startup. ECONNREFUSED likely caused by firewall.');
-    console.error('>>> Ensure you are using the INTERNAL DATABASE URL for your Render environment variable (e.g., DATABASE_URL).');
-    console.error('Error Details:', err.message);
-    return false;
-  }
-}
-
 // 📬 POST Route to handle the Contact Form submission
 app.post('/submit-contact', async (req, res) => {
   const { name, email, message } = req.body;
@@ -115,7 +147,6 @@ app.post('/submit-contact', async (req, res) => {
 
 // 🔒 SECURED: GET Route to display all contact messages in an HTML table
 app.get('/messages', async (req, res) => {
-  // 1. SECURITY CHECK: Check for the required secret token in the query parameters
   const token = req.query.token;
 
   if (!DASHBOARD_TOKEN || token !== DASHBOARD_TOKEN) {
@@ -144,22 +175,24 @@ app.get('/messages', async (req, res) => {
   }
 
   try {
-    // Select all columns from the contact_messages table, ordered newest first
-    const result = await db.query('SELECT name, email, message, created_at FROM contact_messages ORDER BY created_at DESC');
+    const result = await db.query('SELECT name, email, message, created_at FROM contact_messages ORDER BY created_at DESC'); 
     
-    // Generate and send the HTML page containing the table
     const html = generateMessagesTable(result.rows);
     res.send(html);
   } catch (err) {
     console.error('Database Retrieval Error:', err.stack);
-    res.status(500).send('<h1>Error retrieving messages</h1><p>Check the server logs for details.</p>');
+    res.status(500).send('<h1>Error retrieving messages</h1><p>Check the server logs for details. (If you see this error, the migration may have failed.)</p>');
   }
 });
 
 
-// Start the application after attempting a database connection check
+// Start the application after attempting a database connection check AND migration
 async function startServer() {
   const isDbReady = await initDatabase();
+  
+  if (isDbReady) {
+    await runMigrations(); // <-- RUN MIGRATION HERE
+  }
 
   app.listen(port, () => {
     const dbStatus = isDbReady ? 'Database Ready' : 'Database Error';
@@ -168,6 +201,7 @@ async function startServer() {
     if (!DASHBOARD_TOKEN) {
       console.warn('!!! WARNING: DASHBOARD_TOKEN environment variable is not set. The /messages route is inaccessible.');
     } else {
+      // Use the correct secure token value here for easy copying
       console.log(`🔑 Secure dashboard access link: /messages?token=${DASHBOARD_TOKEN}`);
     }
   });

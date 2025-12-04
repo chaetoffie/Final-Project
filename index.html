@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Louvre & Latte</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="keywords" content="Louvre & Latte">
+  <meta name="description" content="Discover our sigma cafe">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="assets/logo.png"/>
+  <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" />
+  <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.11/dist/lenis.css">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+
+  <!-- Smooth scroll -->
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+  </style>
+</head>
+<body id="top">
+
+  <!-- Header & Navigation -->
+  <header class="hero-section">
+    <nav aria-label="Primary">
+      <a href="#top" class="logo">Louvre & Latte</a>
+      <ul>
+        <li><a href="#top">Home</a></li>
+        <li><a href="#about">About Us</a></li>
+        <li><a href="#menu">Menu</a></li>
+        <li><a href="#gallery">Gallery</a></li>
+        <li><a href="#contact">Contact</a></li>
+        <li class="cart-nav">
+          <button id="cart-toggle" aria-expanded="false" aria-controls="cart-panel" title="Open cart">
+            <i class="fal fa-shopping-cart cart" aria-hidden="true"></i>
+            <span class="cart-count" aria-live="polite">0</span>
+          </button>
+          <div class="cart-dropdown" id="cart-panel" role="dialog" aria-label="Shopping Cart">
+            <h4>Your Cart</h4>
+            <ul class="cart-list"></ul>
+            <p class="cart-empty">Cart is empty</p>
+            <div class="cart-total">Total: $0.00</div>
+            <div class="cart-actions">
+              <button class="cart-clear" aria-label="Clear cart">Clear</button>
+              <button class="cart-checkout" aria-label="Checkout">Checkout</button>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="hero-text">
+      <h1>Louvre & Latte</h1>
+      <p>Your daily dose of perfection, brewed with passion from artisans.</p>
+    </div>
+  </header>
+
+  <!-- About Us -->
+  <section id="about" class="menu-section animate-on-scroll">
+    <h2>About Us</h2>
+    <p>Founded with love for coffee and pastries, our café brings you the authentic taste of artisanal brews and French-inspired delights. Every cup is crafted with passion, and every pastry baked fresh daily — so you always feel at home.</p>
+  </section>
+
+  <!-- Main Content -->
+  <main>
+    <section id="menu" class="menu-section">
+            <h2 class="animate-on-scroll">Our Menu</h2>
+
+            <!-- Filters -->
+            <div class="menu-filters animate-on-scroll">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="coffee">Coffee</button>
+                <button class="filter-btn" data-filter="pastry">Pastry</button>
+            </div>
+
+      <div class="menu-grid">
+        <!-- EEFFOC-->
+        <div class="menu-item animate-on-scroll" data-category="coffee">
+          <img src="assets/double-espresso.png" alt="Espresso" class="menu-item-img">
+          <div class="menu-item-content">
+            <h3>Espresso</h3>
+            <p>Rich and bold shot of espresso with intense aroma.</p>
+            <div class="menu-item-footer"><span class="price">$2.50</span><button class="add-to-cart-btn">+</button></div>
+          </div>
+        </div>
+
+        <div class="menu-item animate-on-scroll" data-category="coffee">
+          <img src="assets/cappuccino.png" alt="Cappuccino" class="menu-item-img">
+          <div class="menu-item-content">
+            <h3>Cappuccino</h3>
+            <p>Espresso with steamed milk and velvety foam.</p>
+            <div class="menu-item-footer"><span class="price">$3.80</span><button class="add-to-cart-btn">+</button></div>
+          </div>
+        </div>
+
+        <div class="menu-item animate-on-scroll" data-category="coffee">
+          <img src="assets/caramel-latte.png" alt="Latte" class="menu-item-img">
+          <div class="menu-item-content">
+            <h3>Latte</h3>
+            <p>Espresso with steamed milk and a light layer of foam.</p>
+            <div class="menu-item-footer"><span class="price">$4.00</span><button class="add-to-cart-btn">+</button></div>
+          </div>
+        </div>
+
+        <div class="menu-item animate-on-scroll" data-category="coffee">
+          <img src="assets/Mocha.png" alt="Mocha" class="menu-item-img">
+          <div class="menu-item-content">
+            <h3>Mocha</h3>
+            <p>Chocolate blended with espresso and steamed milk.</p>
+            <div class="menu-item-footer"><span class="price">$4.50</span><button class="add-to-cart-btn">+</button></div>
+          </div>
+        </div>
+
+        <div class="menu-item animate-on-scroll" data-category="coffee">
+          <img src="assets/macchiato.png" alt="Macchiato" class="menu-item-img">
+          <div class="menu-item-content">
+            <h3>Macchiato</h3>
+            <p>Espresso topped with a dollop of milk foam.</p>
+            <div class="menu-item-footer"><span class="price">$3.50</span><button class="add-to-cart-btn">+</button></div>
+          </div>
+        </div>
+
+        <div class="menu-item animate-on-scroll" data-category="coffee">
+          <img src="assets/americano.png" alt="Americano" class="menu-item-img">
+          <div class="menu-item-content">
+            <h3>Americano</h3>
+            <p>Espresso diluted with hot water for a smooth taste.</p>
+            <div class="menu-item-footer"><span class="price">$3.00</span><button class="add-to-cart-btn">+</button></div>
+          </div>
+        </div>
+
+        <div class="menu-item animate-on-scroll" data-category="coffee">
+          <img src="assets/flat-white.png" alt="Flat White" class="menu-item-img">
+          <div class="menu-item-content">
+            <h3>Flat White</h3>
+            <p>Smooth microfoam poured over a double shot of espresso.</p>
+            <div class="menu-item-footer"><span class="price">$4.20</span><button class="add-to-cart-btn">+</button></div>
+          </div>
+        </div>
+
+        <!-- STRIPEASTIRS -->
+        <div class="menu-item animate-on-scroll" data-category="pastry">
+          <img src="assets/croissant.png" alt="Croissant" class="menu-item-img">
+          <div class="menu-item-content">
+            <h3>Croissant</h3>
+            <p>Buttery, flaky, and golden French classic.</p>
+            <div class="menu-item-footer"><span class="price">$2.50</span><button class="add-to-cart-btn">+</button></div>
+          </div>
+        </div>
+
+        <div class="menu-item animate-on-scroll" data-category="pastry">
+          <img src="assets/pain-au-chocolat.png" alt="Pain au Chocolat" class="menu-item-img">
+          <div class="menu-item-content">
+            <h3>Pain au Chocolat</h3>
+            <p>Flaky pastry filled with rich chocolate.</p>
+            <div class="menu-item-footer"><span class="price">$3.00</span><button class="add-to-cart-btn">+</button></div>
+          </div>
+        </div>
+
+        <div class="menu-item animate-on-scroll" data-category="pastry">
+          <img src="assets/eclair.png" alt="Éclair" class="menu-item-img">
+          <div class="menu-item-content">
+            <h3>Éclair</h3>
+            <p>Choux pastry filled with cream and topped with chocolate glaze.</p>
+            <div class="menu-item-footer"><span class="price">$3.50</span><button class="add-to-cart-btn">+</button></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LIGAGERY -->
+    <section id="gallery" class="menu-section animate-on-scroll">
+      <h2>Gallery</h2>
+      <div class="menu-grid">
+        <div class="menu-item"><img src="assets/yes1.png" alt="Gallery 1"></div>
+        <div class="menu-item"><img src="assets/yes2.png" alt="Gallery 2"></div>
+        <div class="menu-item"><img src="assets/yes3.png" alt="Gallery 3"></div>
+        <div class="menu-item"><img src="assets/yes4.png" alt="Gallery 4"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- CONTACTSRST -->
+  <form action="http://localhost:3000/submit-contact" method="post" class="contact-form">
+    <div class="footer-content">
+      <h2 class="logo">Louvre & Latte</h2>
+      <p>Via 152, 00184 Coma RM, Italia</p>
+
+      <!-- FORM FORM -->
+      <form action="save.php" method="post" class="contact-form">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="message">Message</label>
+        <textarea id="message" name="message" required></textarea>
+
+        <button type="submit">Submit</button>
+      </form>
+
+      <!-- SOICALLY INACTIVE -->
+      <div class="social-links">
+        <a href="#" class="social-btn"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="social-btn"><i class="fab fa-telegram-plane"></i></a>
+        <a href="#" class="social-btn"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="social-btn"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="social-btn"><i class="fas fa-globe"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+ <script src="script.js"></script>
+  <script src="https://unpkg.com/lenis@1.3.11/dist/lenis.min.js"></script> 
+</body>
+</html>

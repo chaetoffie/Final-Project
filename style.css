@@ -604,11 +604,8 @@ form button[type="submit"]:hover {
     text-align: left;
 }
 .footer-content {
-    /* REQUIRED LINES FOR CENTERING THE BLOCK: */
-    max-width: 500px; /* 1. Define a maximum width for the whole content area */
-    margin: 0 auto;  /* 2. Center the block itself on the screen */
-    
-    /* Existing layout styles (kept for context): */
+    max-width: 500px; 
+    margin: 0 auto;  
     display: flex;
     flex-direction: column;
     align-items: center; 

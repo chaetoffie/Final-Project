@@ -88,7 +88,7 @@ const menuItems = document.querySelectorAll('#menu .menu-item');
 
         li.querySelector('.cart-item-name').addEventListener('click', e => {
           e.stopPropagation();
-          alert(`Order Details:\n\n${item.name}\nUnit: ${formatMoney(item.price)}\nQty: ${item.qty}\nTotal: ${formatMoney(item.price * item.qty)}`);
+          showToast(`Order Details: ${item.name} - Qty: ${item.qty}`);
         });
 
         li.querySelector('.increase').addEventListener('click', e => {
@@ -144,8 +144,8 @@ const menuItems = document.querySelectorAll('#menu .menu-item');
   });
   cartDropdown.querySelector('.cart-checkout').addEventListener('click', e => {
     e.stopPropagation();
-    if (!cart.length) return alert('Your cart is empty.');
-    alert('Proceeding to checkout... (demo)');
+    if (!cart.length) return showToast('Your cart is empty.');
+    showToast('Proceeding to checkout... (demo)');
   });
 
   /* Toast Notifications */
@@ -180,6 +180,8 @@ const menuItems = document.querySelectorAll('#menu .menu-item');
       openCart();
     });
   });
+
+  // *** The custom contact form submission handler has been removed to allow native browser submission. ***
 
   recalcBadge();
 

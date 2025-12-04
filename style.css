@@ -6,7 +6,7 @@
   --text-color: #e8e6e3;          
   --bg-color: #121212;            
   --header-font: 'Playfair Display', serif;
-  --body-font: 'Lora', serif;
+  --body-font:  "Viaoda Libre", serif;
 }
 
 * { 
@@ -24,6 +24,7 @@ body {
   color: var(--text-color);
   background: linear-gradient(135deg, #1a1a1a, #2b1b0e);
   line-height: 1.6;
+  font-size: 25px;
 }
 
 /* Hero Section */

@@ -15,9 +15,9 @@
 :root {
   --primary: #1a1a1a;
   --secondary: #2d2d2d;
-  --accent: #502f1a;
-  --accent-hover: #502f1a;
-  --success: #61412b;
+  --accent: #0ea5e9;
+  --accent-hover: #0284c7;
+  --success: #10b981;
   --text-primary: #ffffff;
   --text-secondary: #a3a3a3;
   --border: #404040;
@@ -48,7 +48,6 @@ body {
   box-shadow: 0 20px 60px rgba(0,0,0,0.4);
 }
 
-/* Header */
 .header {
   background: linear-gradient(135deg, var(--accent) 0%, #0284c7 100%);
   padding: 32px 24px;
@@ -68,7 +67,6 @@ body {
   font-weight: 500;
 }
 
-/* Cart Section */
 .section {
   padding: 24px;
   border-bottom: 1px solid var(--border);
@@ -158,7 +156,6 @@ body {
   color: var(--accent);
 }
 
-/* QR Code */
 .qr-container {
   text-align: center;
   padding: 16px;
@@ -181,7 +178,6 @@ body {
   margin-bottom: 8px;
 }
 
-/* Form Inputs */
 .form-group {
   margin-bottom: 16px;
 }
@@ -221,7 +217,6 @@ body {
   color: #666;
 }
 
-/* File Upload - iOS FIX */
 .file-upload {
   position: relative;
   width: 100%;
@@ -303,7 +298,6 @@ body {
   }
 }
 
-/* Image Preview */
 .preview-container {
   margin-top: 16px;
   text-align: center;
@@ -317,7 +311,6 @@ body {
   box-shadow: 0 8px 24px rgba(0,0,0,0.3);
 }
 
-/* Button */
 .submit-btn {
   width: 100%;
   padding: 16px;
@@ -359,7 +352,6 @@ body {
   border-radius: 8px;
 }
 
-/* Empty Cart */
 .empty-cart {
   text-align: center;
   padding: 40px 20px;
@@ -372,7 +364,6 @@ body {
   opacity: 0.5;
 }
 
-/* Utility */
 .step-badge {
   display: inline-flex;
   align-items: center;
@@ -385,7 +376,34 @@ body {
   font-weight: 700;
 }
 
-/* Responsive */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 @media (max-width: 480px) {
   .container {
     padding: 12px;
@@ -429,7 +447,6 @@ body {
   }
 }
 
-/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -449,13 +466,11 @@ body {
 <body>
   <div class="container">
     <div class="checkout-card">
-      <!-- Header -->
       <div class="header">
         <h1>💳 Secure Checkout</h1>
         <p class="subtitle">Complete your order</p>
       </div>
 
-      <!-- Cart Items -->
       <div class="section">
         <div class="section-title">
           <span class="step-badge">1</span>
@@ -468,7 +483,6 @@ body {
         </div>
       </div>
 
-      <!-- QR Code -->
       <div class="section">
         <div class="section-title">
           <span class="step-badge">2</span>
@@ -480,7 +494,6 @@ body {
         </div>
       </div>
 
-      <!-- Customer Details -->
       <div class="section">
         <div class="section-title">
           <span class="step-badge">3</span>
@@ -500,7 +513,6 @@ body {
         </div>
       </div>
 
-      <!-- Payment Verification -->
       <div class="section">
         <div class="section-title">
           <span class="step-badge">4</span>
@@ -528,7 +540,6 @@ body {
         </div>
       </div>
 
-      <!-- Submit -->
       <div class="section">
         <button id="confirm-btn" class="submit-btn" onclick="confirmPayment()">
           🔒 Submit Order
@@ -540,12 +551,13 @@ body {
 
   <script>
   const API_URL = 'https://final-project-wujp.onrender.com';
+  const IMGUR_CLIENT_ID = 'b6f41b662f8bdc8'; // Public demo client ID
   
   const cart = JSON.parse(localStorage.getItem('demoCart') || '[]');
   const cartList = document.getElementById('cart-list');
   let total = 0;
+  let uploadedImageUrl = '';
 
-  // Display cart items
   if (cart.length === 0) {
     cartList.innerHTML = `
       <div class="empty-cart">
@@ -568,40 +580,81 @@ body {
 
   document.getElementById('checkout-total').textContent = '₱' + total.toFixed(2);
 
-  // File upload with iOS fix
+  // File upload with image hosting
   const fileInput = document.getElementById('payment-proof');
   const fileNameDisplay = document.getElementById('file-name');
   const previewContainer = document.getElementById('preview');
 
-  fileInput.addEventListener('change', function(e) {
+  fileInput.addEventListener('change', async function(e) {
     const file = e.target.files[0];
     if (file) {
-      // Display file name
       fileNameDisplay.style.display = 'flex';
       fileNameDisplay.innerHTML = `✓ ${file.name}`;
       
-      // Preview image
+      // Preview image locally
       const reader = new FileReader();
       reader.onload = function(event) {
         previewContainer.innerHTML = `<img src="${event.target.result}" alt="Payment Screenshot" class="preview-image">`;
       };
       reader.readAsDataURL(file);
+
+      // Upload to Imgur
+      showLoading('Uploading image...');
+      try {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const response = await fetch('https://api.imgur.com/3/image', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Client-ID ${IMGUR_CLIENT_ID}`
+          },
+          body: formData
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          uploadedImageUrl = data.data.link;
+          console.log('Image uploaded:', uploadedImageUrl);
+        } else {
+          throw new Error('Upload failed');
+        }
+      } catch (error) {
+        console.error('Image upload error:', error);
+        alert('⚠️ Image upload failed, but you can still continue. The filename will be saved.');
+      } finally {
+        hideLoading();
+      }
     }
   });
 
-  // Phone number formatting
   document.getElementById('customer-phone').addEventListener('input', function(e) {
     let value = e.target.value.replace(/\D/g, '');
     if (value.length > 11) value = value.slice(0, 11);
     e.target.value = value;
   });
 
-  // Reference number formatting
   document.getElementById('reference-number').addEventListener('input', function(e) {
     let value = e.target.value.replace(/\D/g, '');
     if (value.length > 13) value = value.slice(0, 13);
     e.target.value = value;
   });
+
+  function showLoading(message) {
+    const overlay = document.createElement('div');
+    overlay.id = 'loading-overlay';
+    overlay.className = 'loading-overlay';
+    overlay.innerHTML = `
+      <div class="spinner"></div>
+      <p style="color: white; font-size: 16px;">${message}</p>
+    `;
+    document.body.appendChild(overlay);
+  }
+
+  function hideLoading() {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) overlay.remove();
+  }
 
   async function confirmPayment() {
     const name = document.getElementById('customer-name').value.trim();
@@ -610,9 +663,8 @@ body {
     const proofFile = document.getElementById('payment-proof').files[0];
     const refNum = document.getElementById('reference-number').value.trim();
 
-    // Validation
     if (!name || !phone || !address || !proofFile || !refNum) {
-      alert('❌ Please complete all fields:\n\n✓ Customer Details\n✓ Payment Screenshot\n✓ Reference Number');
+      alert('❌ Please complete all fields');
       return;
     }
 
@@ -643,7 +695,7 @@ body {
       items: cart,
       total: total,
       referenceNumber: refNum,
-      paymentProof: proofFile.name
+      paymentProof: uploadedImageUrl || proofFile.name // Use uploaded URL or filename
     };
 
     try {
@@ -655,20 +707,19 @@ body {
 
       if (response.ok) {
         localStorage.removeItem('demoCart');
-        alert(`✅ Order Submitted Successfully!\n\nOrder ID: ${order.id}\nTotal: ₱${total.toFixed(2)}\n\nYou will be contacted at ${phone} once verified.`);
+        alert(`✅ Order Submitted Successfully!\n\nOrder ID: ${order.id}\nTotal: ₱${total.toFixed(2)}`);
         window.location.href = 'thankyou.html';
       } else {
         throw new Error('Server error');
       }
     } catch (error) {
       console.error('Order submission error:', error);
-      alert('❌ Error submitting order. Please check your connection and try again.');
+      alert('❌ Error submitting order. Please try again.');
       btn.disabled = false;
       btn.textContent = '🔒 Submit Order';
     }
   }
 
-  // Prevent accidental page close
   window.addEventListener('beforeunload', function (e) {
     const name = document.getElementById('customer-name').value.trim();
     if (name && cart.length > 0) {

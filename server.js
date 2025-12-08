@@ -13,21 +13,19 @@ const DASHBOARD_TOKEN = process.env.DASHBOARD_TOKEN;
 
 // Middleware setup
 app.use(cors());
-app.use(bodyParser.urlencoded({ extended: true })); // Handle standard HTML form data
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // Serve all static files from the root directory
 app.use(express.static(path.join(__dirname, '/')));
 
-
 /**
  * 🛠️ Database Migration Function
- * This function checks for and adds the 'created_at' column if it's missing,
- * allowing the /messages route to work correctly and display timestamps.
+ * This function checks for and adds missing columns/tables
  */
 async function runMigrations() {
   try {
-    // 1. Check if the 'created_at' column exists in the contact_messages table
+    // 1. Check and add 'created_at' column to contact_messages
     const checkQuery = `
       SELECT column_name 
       FROM information_schema.columns 
@@ -37,7 +35,6 @@ async function runMigrations() {
     const checkResult = await db.query(checkQuery);
 
     if (checkResult.rows.length === 0) {
-      // 2. If the column is missing, run the ALTER TABLE command to add it
       console.log('⚠️ Running migration: Adding missing "created_at" column...');
       const alterQuery = `
         ALTER TABLE contact_messages
@@ -46,10 +43,29 @@ async function runMigrations() {
       await db.query(alterQuery);
       console.log('✅ Migration successful: "created_at" column added.');
     } else {
-      console.log('✅ Migration check: "created_at" column already exists. Skipping.');
+      console.log('✅ Migration check: "created_at" column already exists.');
     }
+
+    // 2. Create orders table if it doesn't exist
+    const createOrdersTable = `
+      CREATE TABLE IF NOT EXISTS orders (
+        id VARCHAR(50) PRIMARY KEY,
+        customer_name VARCHAR(255) NOT NULL,
+        phone VARCHAR(20) NOT NULL,
+        address TEXT NOT NULL,
+        items JSONB NOT NULL,
+        total DECIMAL(10,2) NOT NULL,
+        reference_number VARCHAR(13) NOT NULL,
+        payment_proof VARCHAR(255),
+        status VARCHAR(50) DEFAULT 'pending_verification',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+    await db.query(createOrdersTable);
+    console.log('✅ Orders table ready');
+
   } catch (err) {
-    console.error('❌ Migration Error: Could not run schema updates:', err.message);
+    console.error('❌ Migration Error:', err.message);
   }
 }
 
@@ -62,8 +78,8 @@ async function initDatabase() {
     console.log('✅ Database Connection Test Successful:', result.rows[0].solution);
     return true;
   } catch (err) {
-    console.error('❌ FATAL: Database Connection Failed on Startup. ECONNREFUSED likely caused by firewall.');
-    console.error('>>> Ensure you are using the INTERNAL DATABASE URL for your Render environment variable (e.g., DATABASE_URL).');
+    console.error('❌ FATAL: Database Connection Failed on Startup.');
+    console.error('>>> Ensure you are using the INTERNAL DATABASE URL.');
     console.error('Error Details:', err.message);
     return false;
   }
@@ -102,7 +118,6 @@ function generateMessagesTable(messages) {
         th { background-color: #34495e; color: white; padding: 15px; text-align: left; border-bottom: 3px solid #2c3e50; }
         tr:nth-child(even) { background-color: #f9f9f9; }
         tr:hover { background-color: #f1f1f1; cursor: pointer; }
-        .alert-box { padding: 15px; background-color: #f44336; color: white; margin-bottom: 15px; border-radius: 4px; }
       </style>
     </head>
     <body>
@@ -137,15 +152,14 @@ app.post('/submit-contact', async (req, res) => {
     const values = [name, email, message];
     
     await db.query(queryText, values); 
-
     res.redirect('/thankyou.html'); 
   } catch (err) {
-    console.error('Database Insertion Error (Runtime):', err.stack);
+    console.error('Database Insertion Error:', err.stack);
     res.status(500).send('Database connection error. Please try again later.'); 
   }
 });
 
-// 🔒 SECURED: GET Route to display all contact messages in an HTML table
+// 🔒 SECURED: GET Route to display all contact messages
 app.get('/messages', async (req, res) => {
   const token = req.query.token;
 
@@ -156,18 +170,16 @@ app.get('/messages', async (req, res) => {
       <html lang="en">
       <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Access Denied</title>
         <style>
           body { font-family: 'Arial', sans-serif; background-color: #f4f7f9; color: #333; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center;}
           .alert-box { padding: 30px; background-color: #e74c3c; color: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); }
-          h1 { margin-top: 0; }
         </style>
       </head>
       <body>
         <div class="alert-box">
           <h1>403 Forbidden</h1>
-          <p>Access denied. A valid secret token is required to view this dashboard.</p>
+          <p>Access denied. A valid secret token is required.</p>
         </div>
       </body>
       </html>
@@ -176,22 +188,124 @@ app.get('/messages', async (req, res) => {
 
   try {
     const result = await db.query('SELECT name, email, message, created_at FROM contact_messages ORDER BY created_at DESC'); 
-    
     const html = generateMessagesTable(result.rows);
     res.send(html);
   } catch (err) {
     console.error('Database Retrieval Error:', err.stack);
-    res.status(500).send('<h1>Error retrieving messages</h1><p>Check the server logs for details. (If you see this error, the migration may have failed.)</p>');
+    res.status(500).send('<h1>Error retrieving messages</h1>');
   }
 });
 
+// ============================================
+// 🛒 ORDERS API ROUTES
+// ============================================
 
-// Start the application after attempting a database connection check AND migration
+// GET all orders with optional filters
+app.get('/api/orders', async (req, res) => {
+  try {
+    const { status, search } = req.query;
+    let query = 'SELECT * FROM orders WHERE 1=1';
+    const params = [];
+
+    if (status && status !== 'all') {
+      params.push(status);
+      query += ` AND status = $${params.length}`;
+    }
+
+    if (search) {
+      params.push(`%${search}%`);
+      query += ` AND (id ILIKE $${params.length} OR customer_name ILIKE $${params.length} OR phone ILIKE $${params.length})`;
+    }
+
+    query += ' ORDER BY created_at DESC';
+    const result = await db.query(query, params);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    res.status(500).json({ error: 'Failed to fetch orders' });
+  }
+});
+
+// POST new order
+app.post('/api/orders', async (req, res) => {
+  try {
+    const { id, customerName, phone, address, items, total, referenceNumber, paymentProof } = req.body;
+    
+    const result = await db.query(
+      `INSERT INTO orders (id, customer_name, phone, address, items, total, reference_number, payment_proof)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      [id, customerName, phone, address, JSON.stringify(items), total, referenceNumber, paymentProof]
+    );
+
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Error creating order:', error);
+    res.status(500).json({ error: 'Failed to create order' });
+  }
+});
+
+// PATCH update order status
+app.patch('/api/orders/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const result = await db.query(
+      'UPDATE orders SET status = $1 WHERE id = $2 RETURNING *',
+      [status, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error updating order:', error);
+    res.status(500).json({ error: 'Failed to update order' });
+  }
+});
+
+// DELETE order
+app.delete('/api/orders/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.query('DELETE FROM orders WHERE id = $1', [id]);
+    res.json({ message: 'Order deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting order:', error);
+    res.status(500).json({ error: 'Failed to delete order' });
+  }
+});
+
+// GET statistics
+app.get('/api/stats', async (req, res) => {
+  try {
+    const stats = await db.query(`
+      SELECT 
+        COUNT(*) as total_orders,
+        COUNT(*) FILTER (WHERE status = 'pending_verification') as pending,
+        COUNT(*) FILTER (WHERE status = 'verified') as verified,
+        COALESCE(SUM(total) FILTER (WHERE status = 'verified'), 0) as total_revenue
+      FROM orders
+    `);
+
+    res.json(stats.rows[0]);
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+    res.status(500).json({ error: 'Failed to fetch statistics' });
+  }
+});
+
+// ============================================
+// START SERVER
+// ============================================
+
 async function startServer() {
   const isDbReady = await initDatabase();
   
   if (isDbReady) {
-    await runMigrations(); // <-- RUN MIGRATION HERE
+    await runMigrations();
   }
 
   app.listen(port, () => {
@@ -199,10 +313,9 @@ async function startServer() {
     console.log(`Server running on port ${port} | Status: ${dbStatus}`);
     
     if (!DASHBOARD_TOKEN) {
-      console.warn('!!! WARNING: DASHBOARD_TOKEN environment variable is not set. The /messages route is inaccessible.');
+      console.warn('!!! WARNING: DASHBOARD_TOKEN environment variable is not set.');
     } else {
-      // Use the correct secure token value here for easy copying
-      console.log(`🔑 Secure dashboard access link: /messages?token=${DASHBOARD_TOKEN}`);
+      console.log(`🔒 Secure dashboard: /messages?token=${DASHBOARD_TOKEN}`);
     }
   });
 }

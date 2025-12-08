@@ -239,136 +239,129 @@
   </div>
 
   <script>
-    // Load cart from localStorage
-    const cart = JSON.parse(localStorage.getItem('demoCart') || '[]');
-    const cartList = document.getElementById('cart-list');
-    let total = 0;
+  const API_URL = 'https://final-project-wujp.onrender.com'; // REPLACE THIS!
+  
+  const cart = JSON.parse(localStorage.getItem('demoCart') || '[]');
+  const cartList = document.getElementById('cart-list');
+  let total = 0;
 
-    // Display cart items
-    if (cart.length === 0) {
-      cartList.innerHTML = '<p style="color: #c8a064;">Your cart is empty</p>';
-    } else {
-      cart.forEach(item => {
-        total += item.price * item.qty;
-        const div = document.createElement('div');
-        div.className = 'item';
-        div.innerHTML = `<span>${item.name} x${item.qty}</span><span>₱${(item.price * item.qty).toFixed(2)}</span>`;
-        cartList.appendChild(div);
-      });
-    }
-
-    document.getElementById('checkout-total').textContent = 'Total: ₱' + total.toFixed(2);
-
-    // File upload preview
-    document.getElementById('payment-proof').addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (file) {
-        document.getElementById('file-name').textContent = '✓ ' + file.name;
-        
-        const reader = new FileReader();
-        reader.onload = function(event) {
-          document.getElementById('preview').innerHTML = 
-            `<img src="${event.target.result}" alt="Payment Screenshot">`;
-        };
-        reader.readAsDataURL(file);
-      }
+  // Display cart items
+  if (cart.length === 0) {
+    cartList.innerHTML = '<p style="color: #c8a064;">Your cart is empty</p>';
+  } else {
+    cart.forEach(item => {
+      total += item.price * item.qty;
+      const div = document.createElement('div');
+      div.className = 'item';
+      div.innerHTML = `<span>${item.name} x${item.qty}</span><span>₱${(item.price * item.qty).toFixed(2)}</span>`;
+      cartList.appendChild(div);
     });
+  }
 
-    // Phone number formatting
-    document.getElementById('customer-phone').addEventListener('input', function(e) {
-      let value = e.target.value.replace(/\D/g, '');
-      if (value.length > 11) value = value.slice(0, 11);
-      e.target.value = value;
-    });
+  document.getElementById('checkout-total').textContent = 'Total: ₱' + total.toFixed(2);
 
-    // Reference number formatting
-    document.getElementById('reference-number').addEventListener('input', function(e) {
-      let value = e.target.value.replace(/\D/g, '');
-      if (value.length > 13) value = value.slice(0, 13);
-      e.target.value = value;
-    });
-
-    function confirmPayment() {
-      const name = document.getElementById('customer-name').value.trim();
-      const phone = document.getElementById('customer-phone').value.trim();
-      const address = document.getElementById('customer-address').value.trim();
-      const proofFile = document.getElementById('payment-proof').files[0];
-      const refNum = document.getElementById('reference-number').value.trim();
-
-      // Validation
-      if (!name || !phone || !address || !proofFile || !refNum) {
-        alert('❌ Please complete all fields:\n\n✓ Customer Details\n✓ Payment Screenshot\n✓ Reference Number');
-        return;
-      }
-
-      if (phone.length < 10) {
-        alert('❌ Please enter a valid phone number (10-11 digits)');
-        return;
-      }
-
-      if (refNum.length !== 13) {
-        alert('❌ GCash reference number must be exactly 13 digits');
-        return;
-      }
-
-      if (cart.length === 0) {
-        alert('❌ Your cart is empty!');
-        return;
-      }
-
-      // Disable button to prevent double submission
-      const btn = document.getElementById('confirm-btn');
-      btn.disabled = true;
-      btn.textContent = 'Processing...';
-
-      // Create order object
-      const order = {
-        id: 'ORD' + Date.now(),
-        customerName: name,
-        phone: phone,
-        address: address,
-        items: cart,
-        total: total,
-        referenceNumber: refNum,
-        paymentProof: proofFile.name,
-        status: 'pending_verification',
-        timestamp: new Date().toISOString(),
-        dateOrdered: new Date().toLocaleString('en-PH', { 
-          timeZone: 'Asia/Manila',
-          dateStyle: 'medium',
-          timeStyle: 'short'
-        })
+  // File upload preview
+  document.getElementById('payment-proof').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      document.getElementById('file-name').textContent = '✓ ' + file.name;
+      
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        document.getElementById('preview').innerHTML = 
+          `<img src="${event.target.result}" alt="Payment Screenshot">`;
       };
+      reader.readAsDataURL(file);
+    }
+  });
 
-      // Save to orders (localStorage for demo)
-      try {
-        const orders = JSON.parse(localStorage.getItem('allOrders') || '[]');
-        orders.push(order);
-        localStorage.setItem('allOrders', JSON.stringify(orders));
+  // Phone number formatting
+  document.getElementById('customer-phone').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 11) value = value.slice(0, 11);
+    e.target.value = value;
+  });
 
-        // Clear cart
-        localStorage.removeItem('demoCart');
+  // Reference number formatting
+  document.getElementById('reference-number').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 13) value = value.slice(0, 13);
+    e.target.value = value;
+  });
 
-        // Show success message
-        alert(`✅ Order Submitted Successfully!\n\nOrder ID: ${order.id}\nTotal: ₱${total.toFixed(2)}\n\nYour order is pending verification. You will be contacted at ${phone} once verified.`);
+  async function confirmPayment() {
+    const name = document.getElementById('customer-name').value.trim();
+    const phone = document.getElementById('customer-phone').value.trim();
+    const address = document.getElementById('customer-address').value.trim();
+    const proofFile = document.getElementById('payment-proof').files[0];
+    const refNum = document.getElementById('reference-number').value.trim();
 
-        // Redirect to thank you page (create one if needed)
-        window.location.href = 'thankyou.html';
-      } catch (error) {
-        alert('❌ Error submitting order. Please try again.');
-        btn.disabled = false;
-        btn.textContent = 'Submit Order for Verification';
-      }
+    // Validation
+    if (!name || !phone || !address || !proofFile || !refNum) {
+      alert('❌ Please complete all fields:\n\n✓ Customer Details\n✓ Payment Screenshot\n✓ Reference Number');
+      return;
     }
 
-    // Prevent accidental page close if form is filled
-    window.addEventListener('beforeunload', function (e) {
-      const name = document.getElementById('customer-name').value.trim();
-      if (name && cart.length > 0) {
-        e.preventDefault();
-        e.returnValue = '';
+    if (phone.length < 10) {
+      alert('❌ Please enter a valid phone number (10-11 digits)');
+      return;
+    }
+
+    if (refNum.length !== 13) {
+      alert('❌ GCash reference number must be exactly 13 digits');
+      return;
+    }
+
+    if (cart.length === 0) {
+      alert('❌ Your cart is empty!');
+      return;
+    }
+
+    const btn = document.getElementById('confirm-btn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+
+    const order = {
+      id: 'ORD' + Date.now(),
+      customerName: name,
+      phone: phone,
+      address: address,
+      items: cart,
+      total: total,
+      referenceNumber: refNum,
+      paymentProof: proofFile.name
+    };
+
+    try {
+      const response = await fetch(`${API_URL}/api/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(order)
+      });
+
+      if (response.ok) {
+        localStorage.removeItem('demoCart');
+        alert(`✅ Order Submitted Successfully!\n\nOrder ID: ${order.id}\nTotal: ₱${total.toFixed(2)}\n\nYou will be contacted at ${phone} once verified.`);
+        window.location.href = 'thankyou.html';
+      } else {
+        throw new Error('Server error');
       }
-    });
-  </script>
+    } catch (error) {
+      console.error('Order submission error:', error);
+      alert('❌ Error submitting order. Please check your connection and try again.');
+      btn.disabled = false;
+      btn.textContent = 'Submit Order for Verification';
+    }
+  }
+
+  // Prevent accidental page close
+  window.addEventListener('beforeunload', function (e) {
+    const name = document.getElementById('customer-name').value.trim();
+    if (name && cart.length > 0) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+</script>
 </body>
 </html>

@@ -15,6 +15,18 @@ const DASHBOARD_TOKEN = process.env.DASHBOARD_TOKEN;
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+// Admin Protection //
+
+app.get('/admin.html', (req, res, next) => {
+  const token = req.query.token;
+  if (!DASHBOARD_TOKEN || token !== ADMIN_TOKEN) {
+    return res.status(403).send(`
+      <h1>403 Forbidden</h1>
+      <p>Valid token required to access admin dashboard.</p>
+    `);
+  }
+  next();
+});
 
 // Serve all static files from the root directory
 app.use(express.static(path.join(__dirname, '/')));

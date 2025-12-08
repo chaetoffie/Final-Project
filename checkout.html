@@ -5,204 +5,342 @@
   <title>GCash Payment Demo</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display&family=Viaoda+Libre&display=swap" rel="stylesheet">
   <style>
-    /* Base & Colors from your theme */
-    :root {
-      --primary-color: #f5f5dc;
-      --secondary-color: #6f4e37;
-      --accent-color: #c8a064;
-      --text-color: #e8e6e3;
-      --bg-color: #121212;
-      --header-font: 'Playfair Display', serif;
-      --body-font: 'Viaoda Libre', serif;
-    }
+:root {
+  --primary-color: #f5f5dc;
+  --secondary-color: #6f4e37;
+  --accent-color: #c8a064;
+  --text-color: #e8e6e3;
+  --bg-color: #121212;
+  --header-font: 'Playfair Display', serif;
+  --body-font: 'Viaoda Libre', serif;
+}
 
-    body {
-      font-family: var(--body-font);
-      background: linear-gradient(135deg, #1a1a1a, #2b1b0e);
-      display: flex;
-      justify-content: center;
-      padding-top: 60px;
-      color: var(--text-color);
-      line-height: 1.5;
-      min-height: 100vh;
-    }
+body {
+  font-family: var(--body-font);
+  background: linear-gradient(135deg, #1a1a1a, #2b1b0e);
+  display: flex;
+  justify-content: center;
+  padding: 20px 15px 40px;
+  color: var(--text-color);
+  line-height: 1.5;
+  min-height: 100vh;
+  margin: 0;
+}
 
-    .checkout-box {
-      width: 800px;
-      background: #1f1f1f;
-      border: 2px solid var(--secondary-color);
-      border-radius: 14px;
-      padding: 2rem;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.5);
-      text-align: center;
-      margin-bottom: 40px;
-    }
+.checkout-box {
+  width: 100%;
+  max-width: 800px;
+  background: #1f1f1f;
+  border: 2px solid var(--secondary-color);
+  border-radius: 14px;
+  padding: 1.5rem;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+  text-align: center;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+}
 
-    h2 {
-      font-family: var(--header-font);
-      font-size: 2.6rem;
-      color: var(--accent-color);
-      margin-bottom: 0.3rem;
-    }
+h2 {
+  font-family: var(--header-font);
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  color: var(--accent-color);
+  margin-bottom: 0.3rem;
+  line-height: 1.2;
+}
 
-    .subtitle {
-      font-size: 1rem;
-      color: var(--text-color);
-      margin-bottom: 20px;
-      font-style: italic;
-    }
+.subtitle {
+  font-size: 0.95rem;
+  color: var(--text-color);
+  margin-bottom: 20px;
+  font-style: italic;
+}
 
-    #cart-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      max-height: 200px;
-      overflow-y: auto;
-      margin-bottom: 1rem;
-    }
+#cart-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+  padding-right: 5px;
+}
 
-    .item {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 12px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      color: var(--text-color);
-    }
+.item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  color: var(--text-color);
+  font-size: 0.95rem;
+}
 
-    .total {
-      font-family: var(--header-font);
-      font-size: 1.5rem;
-      font-weight: bold;
-      margin: 20px 0;
-      text-align: right;
-      color: var(--accent-color);
-    }
+.total {
+  font-family: var(--header-font);
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin: 20px 0;
+  text-align: right;
+  color: var(--accent-color);
+}
 
-    button {
-      width: 100%;
-      padding: 14px;
-      background: var(--secondary-color);
-      border: none;
-      margin-top: 15px;
-      border-radius: 12px;
-      color: var(--primary-color);
-      font-size: 16px;
-      font-family: var(--body-font);
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
+button {
+  width: 100%;
+  padding: 14px;
+  background: var(--secondary-color);
+  border: none;
+  margin-top: 15px;
+  border-radius: 12px;
+  color: var(--primary-color);
+  font-size: 16px;
+  font-family: var(--body-font);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
 
-    button:hover {
-      background: var(--accent-color);
-      color: var(--bg-color);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    }
+button:hover {
+  background: var(--accent-color);
+  color: var(--bg-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
 
-    button:disabled {
-      background: #555;
-      cursor: not-allowed;
-      transform: none;
-    }
+button:active {
+  transform: translateY(0);
+}
 
-    .note {
-      font-size: 0.85rem;
-      color: var(--text-color);
-      margin-top: 10px;
-    }
+button:disabled {
+  background: #555;
+  cursor: not-allowed;
+  transform: none;
+}
 
-    img.qr {
-      width: 220px;
-      margin: 15px 0;
-      border-radius: 12px;
-      border: 2px solid var(--accent-color);
-    }
+.note {
+  font-size: 0.85rem;
+  color: var(--text-color);
+  margin-top: 10px;
+}
 
-    /* Inputs for Name, Phone, Address */
-    input[type="text"],
-    input[type="tel"] {
-      width: 100%;
-      padding: 0.55rem 0.8rem;
-      margin: 8px 0;
-      border-radius: 10px;
-      border: 1px solid var(--accent-color);
-      background: #121212;
-      color: var(--primary-color);
-      font-family: var(--body-font);
-      font-size: 1rem;
-      box-sizing: border-box;
-    }
+img.qr {
+  width: 100%;
+  max-width: 220px;
+  margin: 15px auto;
+  border-radius: 12px;
+  border: 2px solid var(--accent-color);
+  display: block;
+}
 
-    input::placeholder {
-      color: rgba(255,255,255,0.5);
-    }
+/* Inputs for Name, Phone, Address */
+input[type="text"],
+input[type="tel"] {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  margin: 8px 0;
+  border-radius: 10px;
+  border: 1px solid var(--accent-color);
+  background: #121212;
+  color: var(--primary-color);
+  font-family: var(--body-font);
+  font-size: 1rem;
+  box-sizing: border-box;
+}
 
-    /* File Upload Styling */
-    .file-upload-wrapper {
-      position: relative;
-      margin: 15px 0;
-      padding: 20px;
-      border: 2px dashed var(--accent-color);
-      border-radius: 10px;
-      background: rgba(200, 160, 100, 0.05);
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
+input::placeholder {
+  color: rgba(255,255,255,0.5);
+}
 
-    .file-upload-wrapper:hover {
-      background: rgba(200, 160, 100, 0.1);
-      border-color: var(--primary-color);
-    }
+/* File Upload Styling */
+.file-upload-wrapper {
+  position: relative;
+  margin: 15px 0;
+  padding: 20px;
+  border: 2px dashed var(--accent-color);
+  border-radius: 10px;
+  background: rgba(200, 160, 100, 0.05);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
 
-    .file-upload-wrapper input[type="file"] {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      opacity: 0;
-      cursor: pointer;
-    }
+.file-upload-wrapper:hover {
+  background: rgba(200, 160, 100, 0.1);
+  border-color: var(--primary-color);
+}
 
-    .file-upload-label {
-      color: var(--accent-color);
-      font-size: 0.95rem;
-    }
+.file-upload-wrapper input[type="file"] {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  cursor: pointer;
+}
 
-    .file-name {
-      color: var(--primary-color);
-      margin-top: 5px;
-      font-size: 0.85rem;
-    }
+.file-upload-label {
+  color: var(--accent-color);
+  font-size: 0.95rem;
+}
 
-    #preview {
-      margin: 15px 0;
-    }
+.file-name {
+  color: var(--primary-color);
+  margin-top: 5px;
+  font-size: 0.85rem;
+  word-break: break-word;
+}
 
-    #preview img {
-      max-width: 300px;
-      border-radius: 10px;
-      border: 2px solid var(--accent-color);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-    }
+#preview {
+  margin: 15px 0;
+  text-align: center;
+}
 
-    .section-title {
-      font-family: var(--header-font);
-      font-size: 1.3rem;
-      color: var(--accent-color);
-      margin: 25px 0 10px 0;
-      text-align: left;
-    }
+#preview img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  border: 2px solid var(--accent-color);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
 
-    .instruction {
-      font-size: 0.9rem;
-      color: var(--text-color);
-      text-align: left;
-      margin: 10px 0;
-      padding-left: 10px;
-      border-left: 3px solid var(--accent-color);
-    }
-  </style>
+.section-title {
+  font-family: var(--header-font);
+  font-size: 1.2rem;
+  color: var(--accent-color);
+  margin: 25px 0 10px 0;
+  text-align: left;
+}
+
+.instruction {
+  font-size: 0.9rem;
+  color: var(--text-color);
+  text-align: left;
+  margin: 10px 0;
+  padding-left: 10px;
+  border-left: 3px solid var(--accent-color);
+}
+
+/* Media Queries for Mobile Optimization */
+@media (max-width: 768px) {
+  body {
+    padding: 15px 10px 30px;
+    padding-top: 20px;
+  }
+  
+  .checkout-box {
+    padding: 1.25rem;
+    border-width: 1px;
+  }
+  
+  h2 {
+    font-size: 1.6rem;
+  }
+  
+  .subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .item {
+    font-size: 0.9rem;
+    padding: 6px 8px;
+  }
+  
+  .total {
+    font-size: 1.2rem;
+    margin: 15px 0;
+  }
+  
+  button {
+    padding: 12px;
+    font-size: 15px;
+  }
+  
+  input[type="text"],
+  input[type="tel"] {
+    padding: 0.65rem 0.8rem;
+    font-size: 0.95rem;
+  }
+  
+  .file-upload-wrapper {
+    padding: 15px;
+  }
+  
+  .file-upload-label {
+    font-size: 0.9rem;
+  }
+  
+  .section-title {
+    font-size: 1.1rem;
+    margin: 20px 0 8px 0;
+  }
+  
+  .instruction {
+    font-size: 0.85rem;
+    padding-left: 8px;
+  }
+  
+  img.qr {
+    max-width: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .checkout-box {
+    padding: 1rem;
+    border-radius: 10px;
+  }
+  
+  h2 {
+    font-size: 1.4rem;
+  }
+  
+  #cart-list {
+    max-height: 150px;
+    font-size: 0.85rem;
+  }
+  
+  .item {
+    font-size: 0.85rem;
+  }
+  
+  button {
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 8px;
+  }
+  
+  .file-upload-wrapper {
+    padding: 12px;
+  }
+  
+  .file-upload-label {
+    font-size: 0.85rem;
+  }
+  
+  .section-title {
+    font-size: 1rem;
+  }
+  
+  img.qr {
+    max-width: 150px;
+  }
+}
+
+/* Prevent text selection on buttons for mobile */
+button {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* Improve touch targets for mobile */
+input, button, .file-upload-wrapper {
+  min-height: 44px;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+</style>
 </head>
 <body>
   <div class="checkout-box">

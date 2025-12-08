@@ -28,34 +28,48 @@
 </head>
 <body id="top">
 
-  <!-- Header & Navigation -->
-  <header class="hero-section">
-    <nav aria-label="Primary">
-      <a href="#top" class="logo">Louvre & Latte</a>
-      <ul>
-        <li><a href="#top">Home</a></li>
-        <li><a href="#about">About Us</a></li>
-        <li><a href="#menu">Menu</a></li>
-        <li><a href="#gallery">Gallery</a></li>
-        <li><a href="#contact">Contact</a></li>
-        <li class="cart-nav">
-          <button id="cart-toggle" aria-expanded="false" aria-controls="cart-panel" title="Open cart">
-            <i class="fal fa-shopping-cart cart" aria-hidden="true"></i>
-            <span class="cart-count" aria-live="polite">0</span>
-          </button>
-          <div class="cart-dropdown" id="cart-panel" role="dialog" aria-label="Shopping Cart">
-            <h4>Your Cart</h4>
-            <ul class="cart-list"></ul>
-            <p class="cart-empty">Cart is empty</p>
-            <div class="cart-total">Total: $0.00</div>
-            <div class="cart-actions">
-              <button class="cart-clear" aria-label="Clear cart">Clear</button>
-              <button class="cart-checkout" aria-label="Checkout">Checkout</button>
-            </div>
-          </div>
-        </li>
-      </ul>
-    </nav>
+ <nav aria-label="Primary">
+
+  <!-- Logo -->
+  <a href="#top" class="logo">Louvre & Latte</a>
+
+  <!-- Hamburger Button -->
+  <button class="hamburger" id="hamburger-btn" aria-label="Toggle menu">
+      <span></span>
+      <span></span>
+      <span></span>
+  </button>
+
+  <!-- Mobile / Desktop Nav Links -->
+  <ul class="nav-links" id="mobile-menu">
+    <li><a href="#top">Home</a></li>
+    <li><a href="#about">About Us</a></li>
+    <li><a href="#menu">Menu</a></li>
+    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#contact">Contact</a></li>
+
+    <!-- Cart stays inside menu on mobile -->
+    <li class="cart-nav">
+      <button id="cart-toggle" aria-expanded="false" aria-controls="cart-panel" title="Open cart">
+        <i class="fal fa-shopping-cart cart"></i>
+        <span class="cart-count">0</span>
+      </button>
+
+      <div class="cart-dropdown" id="cart-panel">
+        <h4>Your Cart</h4>
+        <ul class="cart-list"></ul>
+        <p class="cart-empty">Cart is empty</p>
+        <div class="cart-total">Total: ₱0.00</div>
+        <div class="cart-actions">
+          <button class="cart-clear">Clear</button>
+          <button class="cart-checkout">Checkout</button>
+        </div>
+      </div>
+    </li>
+  </ul>
+
+</nav>
+
 
     <div class="hero-text">
       <h1>Louvre & Latte</h1>

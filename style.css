@@ -488,6 +488,85 @@ nav a:hover::after {
 .toast.show { 
   right: 30px; 
 }
+/* Hamburger button (hidden on desktop) */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 9999;
+}
+
+.hamburger span {
+  width: 28px;
+  height: 3px;
+  background: var(--primary-color);
+  border-radius: 2px;
+  transition: all .3s ease;
+}
+
+/* Hamburger animation (X shape when active) */
+.hamburger.active span:nth-child(1) {
+  transform: translateY(9px) rotate(45deg);
+}
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+.hamburger.active span:nth-child(3) {
+  transform: translateY(-9px) rotate(-45deg);
+}
+
+/* Mobile Menu hidden initially */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  nav {
+    position: relative;
+    padding: 1rem 5%;
+  }
+
+  .hamburger {
+    display: flex;
+    position: absolute;
+    right: 5%;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  /* Turn nav-links into sliding mobile menu */
+  .nav-links {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 100%;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(6px);
+    flex-direction: column;
+    text-align: center;
+    padding: 1.5rem 0;
+    gap: 1.3rem;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .35s ease;
+  }
+
+  .nav-links.open {
+    max-height: 500px;
+    padding-bottom: 2rem;
+  }
+
+  /* Move cart inside menu nicely */
+  .cart-nav {
+    margin-top: 10px;
+  }
+}
 
 /* Responsive */
 @media (max-width: 768px) {

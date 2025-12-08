@@ -614,3 +614,137 @@ form button[type="submit"]:hover {
     text-align: center;
     padding: 40px 20px;
 }
+/* ----------- 🔥 FULL MOBILE OPTIMIZATION ----------- */
+
+@media (max-width: 900px) {
+  body {
+    font-size: 20px;
+  }
+
+  nav {
+    padding: 1rem 6%;
+  }
+
+  nav ul {
+    gap: 1.2rem;
+  }
+
+  .hero-text h1 {
+    font-size: 3.2rem;
+  }
+}
+
+/* Tablets + Large Phones */
+@media (max-width: 768px) {
+
+  /* Navigation: stack vertically */
+  nav {
+    flex-direction: column;
+    gap: 0.8rem;
+    padding: 1rem 5%;
+  }
+
+  nav ul {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem 1.5rem;
+  }
+
+  .hero-section {
+    background-attachment: scroll;
+    padding: 6rem 1rem 4rem;
+  }
+
+  .hero-text h1 {
+    font-size: 2.7rem;
+  }
+
+  .hero-text p {
+    font-size: 1.1rem;
+  }
+
+  .menu-section {
+    padding: 3rem 6%;
+  }
+
+  /* Menu grid becomes 2 per row */
+  .menu-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.2rem;
+  }
+
+  /* Cart dropdown scaling */
+  .cart-dropdown {
+    width: 270px;
+    right: -10px;
+  }
+}
+
+/* Small Phones (iPhone SE, Android small) */
+@media (max-width: 600px) {
+
+  body {
+    font-size: 18px;
+  }
+
+  .hero-section {
+    min-height: auto;
+    padding-top: 140px;
+  }
+
+  .hero-text h1 {
+    font-size: 2.2rem;
+  }
+
+  /* Menu grid becomes 1 per row */
+  .menu-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.2rem;
+  }
+
+  .menu-item-img {
+    height: 180px;
+  }
+
+  .menu-item h3 {
+    font-size: 1.1rem;
+  }
+
+  /* Buttons bigger for touch */
+  .add-to-cart-btn {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.95rem;
+  }
+
+  /* Filter buttons wrap nicely */
+  .menu-filters {
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 0.45rem 0.9rem;
+    font-size: 0.85rem;
+  }
+
+  /* Cart dropdown better fit */
+  .cart-dropdown {
+    width: 90vw;
+    right: 50%;
+    transform: translateX(50%);
+  }
+
+  /* Contact form responsiveness */
+  .contact-form {
+    padding: 20px;
+  }
+
+  /* Footer */
+  .footer-content {
+    padding: 20px 10px;
+  }
+
+  .site-footer .logo {
+    font-size: 1.6rem;
+  }
+}

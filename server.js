@@ -10,6 +10,7 @@ const port = process.env.PORT || 3000;
 
 // IMPORTANT: Load the secret token from environment variables
 const DASHBOARD_TOKEN = process.env.DASHBOARD_TOKEN;
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN;
 
 // Middleware setup
 app.use(cors());
@@ -19,7 +20,7 @@ app.use(bodyParser.json());
 
 app.get('/admin.html', (req, res, next) => {
   const token = req.query.token;
-  if (!DASHBOARD_TOKEN || token !== ADMIN_TOKEN) {
+  if (!ADMIN_TOKEN || token !== ADMIN_TOKEN) {
     return res.status(403).send(`
       <h1>403 Forbidden</h1>
       <p>Valid token required to access admin dashboard.</p>

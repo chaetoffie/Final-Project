@@ -24,6 +24,7 @@
       padding-top: 60px;
       color: var(--text-color);
       line-height: 1.5;
+      min-height: 100vh;
     }
 
     .checkout-box {
@@ -34,6 +35,7 @@
       padding: 2rem;
       box-shadow: 0 6px 18px rgba(0,0,0,0.5);
       text-align: center;
+      margin-bottom: 40px;
     }
 
     h2 {
@@ -97,6 +99,12 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
 
+    button:disabled {
+      background: #555;
+      cursor: not-allowed;
+      transform: none;
+    }
+
     .note {
       font-size: 0.85rem;
       color: var(--text-color);
@@ -111,7 +119,8 @@
     }
 
     /* Inputs for Name, Phone, Address */
-    input {
+    input[type="text"],
+    input[type="tel"] {
       width: 100%;
       padding: 0.55rem 0.8rem;
       margin: 8px 0;
@@ -121,10 +130,77 @@
       color: var(--primary-color);
       font-family: var(--body-font);
       font-size: 1rem;
+      box-sizing: border-box;
     }
 
     input::placeholder {
       color: rgba(255,255,255,0.5);
+    }
+
+    /* File Upload Styling */
+    .file-upload-wrapper {
+      position: relative;
+      margin: 15px 0;
+      padding: 20px;
+      border: 2px dashed var(--accent-color);
+      border-radius: 10px;
+      background: rgba(200, 160, 100, 0.05);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .file-upload-wrapper:hover {
+      background: rgba(200, 160, 100, 0.1);
+      border-color: var(--primary-color);
+    }
+
+    .file-upload-wrapper input[type="file"] {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .file-upload-label {
+      color: var(--accent-color);
+      font-size: 0.95rem;
+    }
+
+    .file-name {
+      color: var(--primary-color);
+      margin-top: 5px;
+      font-size: 0.85rem;
+    }
+
+    #preview {
+      margin: 15px 0;
+    }
+
+    #preview img {
+      max-width: 300px;
+      border-radius: 10px;
+      border: 2px solid var(--accent-color);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .section-title {
+      font-family: var(--header-font);
+      font-size: 1.3rem;
+      color: var(--accent-color);
+      margin: 25px 0 10px 0;
+      text-align: left;
+    }
+
+    .instruction {
+      font-size: 0.9rem;
+      color: var(--text-color);
+      text-align: left;
+      margin: 10px 0;
+      padding-left: 10px;
+      border-left: 3px solid var(--accent-color);
     }
   </style>
 </head>
@@ -136,47 +212,163 @@
     <div id="cart-list"></div>
     <p class="total" id="checkout-total">Total: ₱0</p>
 
-    <p>Scan this QR code using your GCash app:</p>
+    <div class="section-title">Step 1: Scan & Pay</div>
+    <p class="instruction">Scan this QR code using your GCash app to complete payment</p>
     <img src="assets/gcash-qr.png" alt="GCash QR" class="qr">
 
-    <!-- Customer Details -->
+    <div class="section-title">Step 2: Customer Details</div>
     <input type="text" id="customer-name" placeholder="Full Name" required>
-    <input type="tel" id="customer-phone" placeholder="Phone Number" required>
-    <input type="text" id="customer-address" placeholder="Delivery Address" required>
+    <input type="tel" id="customer-phone" placeholder="Phone Number (e.g., 09XXXXXXXXX)" required>
+    <input type="text" id="customer-address" placeholder="Complete Delivery Address" required>
 
-    <button onclick="confirmPayment()">I Paid</button>
-    <p class="note">This is a demo. No real payment is processed.</p>
+    <div class="section-title">Step 3: Payment Verification</div>
+    <p class="instruction">Upload your GCash payment screenshot and enter reference number</p>
+    
+    <div class="file-upload-wrapper" onclick="document.getElementById('payment-proof').click()">
+      <input type="file" id="payment-proof" accept="image/*" required>
+      <div class="file-upload-label">📸 Click to Upload Payment Screenshot</div>
+      <div class="file-name" id="file-name"></div>
+    </div>
+
+    <div id="preview"></div>
+
+    <input type="text" id="reference-number" placeholder="GCash Reference Number (13 digits)" maxlength="13" required>
+
+    <button id="confirm-btn" onclick="confirmPayment()">Submit Order for Verification</button>
+    <p class="note">This is a demo. Your order will be saved for manual verification.</p>
   </div>
 
   <script>
+    // Load cart from localStorage
     const cart = JSON.parse(localStorage.getItem('demoCart') || '[]');
     const cartList = document.getElementById('cart-list');
     let total = 0;
 
-    cart.forEach(item => {
-      total += item.price * item.qty;
-      const div = document.createElement('div');
-      div.className = 'item';
-      div.innerHTML = `<span>${item.name} x${item.qty}</span><span>₱${(item.price * item.qty).toFixed(2)}</span>`;
-      cartList.appendChild(div);
-    });
+    // Display cart items
+    if (cart.length === 0) {
+      cartList.innerHTML = '<p style="color: #c8a064;">Your cart is empty</p>';
+    } else {
+      cart.forEach(item => {
+        total += item.price * item.qty;
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.innerHTML = `<span>${item.name} x${item.qty}</span><span>₱${(item.price * item.qty).toFixed(2)}</span>`;
+        cartList.appendChild(div);
+      });
+    }
 
     document.getElementById('checkout-total').textContent = 'Total: ₱' + total.toFixed(2);
+
+    // File upload preview
+    document.getElementById('payment-proof').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        document.getElementById('file-name').textContent = '✓ ' + file.name;
+        
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          document.getElementById('preview').innerHTML = 
+            `<img src="${event.target.result}" alt="Payment Screenshot">`;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Phone number formatting
+    document.getElementById('customer-phone').addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length > 11) value = value.slice(0, 11);
+      e.target.value = value;
+    });
+
+    // Reference number formatting
+    document.getElementById('reference-number').addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length > 13) value = value.slice(0, 13);
+      e.target.value = value;
+    });
 
     function confirmPayment() {
       const name = document.getElementById('customer-name').value.trim();
       const phone = document.getElementById('customer-phone').value.trim();
       const address = document.getElementById('customer-address').value.trim();
+      const proofFile = document.getElementById('payment-proof').files[0];
+      const refNum = document.getElementById('reference-number').value.trim();
 
-      if(!name || !phone || !address){
-        alert('Please fill all details before confirming payment.');
+      // Validation
+      if (!name || !phone || !address || !proofFile || !refNum) {
+        alert('❌ Please complete all fields:\n\n✓ Customer Details\n✓ Payment Screenshot\n✓ Reference Number');
         return;
       }
 
-      alert(`Payment confirmed!\n\nName: ${name}\nPhone: ${phone}\nAddress: ${address}\nTotal: ₱${total.toFixed(2)}`);
-      localStorage.removeItem('demoCart');
-      window.location.href = 'thankyou.html';
+      if (phone.length < 10) {
+        alert('❌ Please enter a valid phone number (10-11 digits)');
+        return;
+      }
+
+      if (refNum.length !== 13) {
+        alert('❌ GCash reference number must be exactly 13 digits');
+        return;
+      }
+
+      if (cart.length === 0) {
+        alert('❌ Your cart is empty!');
+        return;
+      }
+
+      // Disable button to prevent double submission
+      const btn = document.getElementById('confirm-btn');
+      btn.disabled = true;
+      btn.textContent = 'Processing...';
+
+      // Create order object
+      const order = {
+        id: 'ORD' + Date.now(),
+        customerName: name,
+        phone: phone,
+        address: address,
+        items: cart,
+        total: total,
+        referenceNumber: refNum,
+        paymentProof: proofFile.name,
+        status: 'pending_verification',
+        timestamp: new Date().toISOString(),
+        dateOrdered: new Date().toLocaleString('en-PH', { 
+          timeZone: 'Asia/Manila',
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        })
+      };
+
+      // Save to orders (localStorage for demo)
+      try {
+        const orders = JSON.parse(localStorage.getItem('allOrders') || '[]');
+        orders.push(order);
+        localStorage.setItem('allOrders', JSON.stringify(orders));
+
+        // Clear cart
+        localStorage.removeItem('demoCart');
+
+        // Show success message
+        alert(`✅ Order Submitted Successfully!\n\nOrder ID: ${order.id}\nTotal: ₱${total.toFixed(2)}\n\nYour order is pending verification. You will be contacted at ${phone} once verified.`);
+
+        // Redirect to thank you page (create one if needed)
+        window.location.href = 'thankyou.html';
+      } catch (error) {
+        alert('❌ Error submitting order. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Submit Order for Verification';
+      }
     }
+
+    // Prevent accidental page close if form is filled
+    window.addEventListener('beforeunload', function (e) {
+      const name = document.getElementById('customer-name').value.trim();
+      if (name && cart.length > 0) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
   </script>
 </body>
 </html>
